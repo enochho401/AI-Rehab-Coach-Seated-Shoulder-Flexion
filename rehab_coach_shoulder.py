@@ -91,7 +91,7 @@ def analyse_shoulder_flexion(landmarks):
     issues = []
     if shoulder_angle < 70:
         issues.append("arm_too_low")
-    if elbow_angle < 130:  # loosened threshold
+    if elbow_angle < 130:
         issues.append("elbow_bent")
     if abs(shoulder[0] - hip[0]) > 0.08:
         issues.append("body_leaning")
@@ -112,14 +112,13 @@ def issues_to_text(issues):
     return ", ".join(mapping.get(i, i) for i in issues) if issues else "form looks good"
 
 def call_openrouter(api_key, messages, posture_context=""):
-    """Call OpenRouter API with shorter replies."""
     system_prompt = (
         "You are a friendly rehab coach for seated shoulder flexion. "
         "Keep every reply short (1-2 sentences). Be encouraging and clear. "
         "Speak like a real therapist talking to a patient. "
         f"Current posture: {posture_context if posture_context else 'no recent capture'}."
     )
-    full_messages = [{"role": "system", "content": system_prompt}] + messages[-6:]  # keep context short
+    full_messages = [{"role": "system", "content": system_prompt}] + messages[-6:]
 
     try:
         response = requests.post(
@@ -141,7 +140,6 @@ def call_openrouter(api_key, messages, posture_context=""):
     except Exception as e:
         return f"Sorry, I could not reach the AI right now."
 
-# ====================== WEBRTC PROCESSOR ======================
 class PoseProcessor(VideoProcessorBase):
     def __init__(self):
         self.latest_frame = None
@@ -167,10 +165,8 @@ class PoseProcessor(VideoProcessorBase):
 
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
-# ====================== UI ======================
 st.set_page_config(page_title="Rehab Coach", page_icon="💪", layout="wide")
 
-# Sidebar for API key
 with st.sidebar:
     st.header("Settings")
     api_key = st.text_input("OpenRouter API Key", type="password", help="Paste your sk-or-... key here")
@@ -251,11 +247,9 @@ with col2:
         speak(feedback)
         st.rerun()
 
-    # Voice input
     if st.button("🎤 Speak to Coach (use Chrome)"):
         listen_and_send()
 
-    # Normal chat
     if prompt := st.chat_input("Chat with the coach or use voice button above..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         if api_key:
